@@ -1,0 +1,268 @@
+---
+title: "Group_assignment"
+author: "Marc Zeng"
+date: "`r Sys.Date()`"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, results='hide', echo=FALSE, warning=FALSE, message=FALSE}
+hist_data <- read.csv('hist_data.csv')
+dataA1 = read.csv("dataA1.csv")
+dataB1 = read.csv("dataB1.csv")
+dataA2_or = read.csv("dataA3.csv")
+dataB2_or = read.csv("dataB2.csv")
+dataA3_or = read.csv('dataA3.csv')
+dataB3_or = read.csv('dataB3.csv')
+dataA4_or = read.csv('dataA4.csv')
+dataB4_or = read.csv('dataB4.csv')
+
+dataA2 = rbind(dataA1, dataA2_or)
+dataB2 = rbind(dataB1, dataB2_or)
+dataA3 = rbind(dataA2, dataA3_or)
+dataB3 = rbind(dataB2, dataB3_or)
+dataA4 = rbind(dataA3, dataA4_or)
+dataB4 = rbind(dataB3, dataB4_or)
+
+```
+
+**Case Summary** Case objective: To examinate whether the proposal of
+decreasing rank tolerance parameter to 4 points and increasing the
+cut-off parameter to 20 seconds could improve the revenue.
+
+Background information: The company creates revenue by in-game virtual
+item purchase and ad clicks. The longer time the play is, the more
+likely the virtual items would be purchased. The longer time the idle
+time is, the more ad are likely to be clicked. Players with closer rank
+could longer the playing time. Playing with bot only spends short time.
+On average, each ad click could result in \$0.01 income and in-game
+virtual item purchase values between \$1 to \$5. The original matching
+algorithm is that the rank tolerance is 5 points and cut-off time is 15
+second. The new proposed one is that the rank tolerance is 4 points and
+cut-off time is 20 seconds. Supposedly, renuvue from both ad clicks and
+in-game virtual item purchase would be increased.
+
+Key stakeholder concerns: As the new proposal is under test, if the
+revenue is decreasing rather than increasing as expected, the potential
+loss would be huge. Also, longer idle time could undermine the user
+experience, which brings potential customer loss risk.
+
+Decision point: After A/B test, if the revenue could be proved to show
+significant increase, the new proposal could be adopted, or the original
+one would be kept.
+
+**A/B Test Design** Hypotheses: H0: The new proposal has no significant
+effect on revenue (revenue regarding new proposal \<= revenue regarding
+original algorithm). H1: The new proposal increases revenue (revenue
+regarding new proposal \> revenue regarding original algorithm).
+
+HO: The new proposal has no significant effect on more ads clicked
+during idle time (\<=) H1: (\>)
+
+H0: The new proposal has no significant effect on increase of game
+duration. (\<=) H1: (\>)
+
+H0: The new proposal has no significant effect on increase of in-game
+purchases. (\<=). H1: (\>)
+
+Randomization plan: Not required for now.
+
+Data Collection plan: From quercus
+
+Statistical testing method: As the data is collected with time
+sequentially ,the SPRT method could be adopted. Note that in order to
+control Type I error and control power of the test, alpha is set to be
+0.05 and beta is set to be 0.2.
+
+**A/B Test** Day One A1/B1
+```{r, results='hide', echo=FALSE, warning=FALSE, message=FALSE}
+    # Compute average revenue from ads and in-game purchases for control group
+avg_ad_revenue_A1<- mean(dataA1$ad_clicks)*0.01
+avg_purchase_revenue_A1 <- mean(dataA1$in_game_purchases)
+# Compute average revenue from ads and in-game purchases for treatment group
+avg_ad_revenue_B1 <- mean(dataB1$ad_clicks) * 0.01
+avg_purchase_revenue_B1 <- mean(dataB1$in_game_purchases)
+
+# T-test for total revenue
+t_test_total_revenue_day1 <- t.test(dataA1$ad_clicks * 0.01+dataA1$in_game_purchases,
+                                    dataB1$ad_clicks * 0.01+dataB1$in_game_purchases)
+t_test_total_revenue_day1$p.value
+
+# T-test for ad revenue
+t_test_ad_revenue_day1 <- t.test(dataA1$ad_clicks*0.01, dataB1$ad_clicks*0.01)
+t_test_ad_revenue_day1$p.value
+
+# T-test for in-game purchase revenue
+t_test_purchase_revenue_day1 <- t.test(dataA1$in_game_purchases, dataB1$in_game_purchases)
+t_test_purchase_revenue_day1$p.value
+#
+t_test_gduration_day1 <- t.test(dataA1$play_time, dataB1$play_time)
+t_test_gduration_day1$p.value
+
+
+```
+
+
+
+Day Two A2/B2
+
+```{r, results='hide', echo=FALSE, warning=FALSE, message=FALSE}
+avg_ad_revenue_A2 <- mean(dataA2$ad_clicks)*0.01
+avg_purchase_revenue_A2 <- mean(dataA2$in_game_purchases)
+# Compute average revenue from ads and in-game purchases for treatment group
+avg_ad_revenue_B2 <- mean(dataB2$ad_clicks) * 0.01
+avg_purchase_revenue_B2 <- mean(dataB2$in_game_purchases)
+
+# T-test for total revenue
+t_test_total_revenue_day2 <- t.test(dataA2$ad_clicks * 0.01+dataA2$in_game_purchases,
+                                    dataB2$ad_clicks * 0.01+dataB2$in_game_purchases)
+t_test_total_revenue_day2$p.value
+
+# T-test for ad revenue
+t_test_ad_revenue_day2 <- t.test(dataA2$ad_clicks*0.01, dataB2$ad_clicks*0.01)
+t_test_ad_revenue_day2$p.value
+
+# T-test for in-game purchase revenue
+t_test_purchase_revenue_day2 <- t.test(dataA2$in_game_purchases, dataB2$in_game_purchases)
+t_test_purchase_revenue_day2$p.value
+
+t_test_gduration_day2 <- t.test(dataA2$play_time, dataB2$play_time)
+t_test_gduration_day2$p.value
+```
+
+
+
+For chances of matching players with closer ranks
+
+```{r, results='hide', echo=FALSE, warning=FALSE, message=FALSE}
+# T-test for total reveue
+t_test_total_revenue_day3 <- t.test(dataA3$ad_clicks*0.01+dataA3$in_game_purchases,dataB3$ad_clicks * 0.01+dataB3$in_game_purchases)
+t_test_total_revenue_day3$p.value
+
+# T-test for ad revenue
+t_test_ad_revenue_day3 <- t.test(dataA3$ad_clicks * 0.01, dataB3$ad_clicks * 0.01)
+t_test_ad_revenue_day3$p.value
+
+# T-test for in-game purchase revenue
+t_test_purchase_revenue_day3 <- t.test(dataA3$in_game_purchases, dataB3$in_game_purchases)
+t_test_purchase_revenue_day3$p.value
+
+t_test_gduration_day3 <- t.test(dataA3$play_time, dataB3$play_time)
+t_test_gduration_day3$p.value
+
+
+```
+
+So, in day 3, total revenue and in-game purchase and game duration demonstrated
+significant change already.
+Test the power
+
+
+```{r, results='hide', echo=FALSE, warning=FALSE, message=FALSE}
+K <- 1000
+rej <- rep(NA,K)
+n = length(dataA3$in_game_purchases)
+x <- dataA3$in_game_purchases * 0.01
+y <- dataB3$in_game_purchases * 0.01
+for(i in 1:K){
+  ind <- sample(1:n,size=n,replace=TRUE)
+  rej[i] <- t.test(x[ind],y[ind])$p.value<0.05
+}
+
+ttestPow <- sum(rej)/K
+ttestPow
+```
+
+```{r, results='hide', echo=FALSE, warning=FALSE, message=FALSE}
+K <- 1000
+rej <- rep(NA,K)
+
+n = length(dataA3$play_time)
+x <- dataA3$play_time
+y <- dataB3$play_time
+for(i in 1:K){
+  ind <- sample(1:n,size=n,replace=TRUE)
+  rej[i] <- t.test(x[ind],y[ind])$p.value<0.05
+}
+
+ttestPow <- sum(rej)/K
+ttestPow
+```
+
+```{r, results='hide', echo=FALSE, warning=FALSE, message=FALSE}
+total_revenueA3 <- dataA3$ad_clicks * 0.01+dataA3$in_game_purchases
+total_revenueB3 <- dataB3$ad_clicks * 0.01+dataB3$in_game_purchases
+K <- 1000
+rej <- rep(NA,K)
+n = length(total_revenueA3)
+x <- total_revenueA3 
+y <- total_revenueB3
+for(i in 1:K){
+  ind <- sample(1:n,size=n,replace=TRUE)
+  rej[i] <- t.test(x[ind],y[ind])$p.value<0.05
+}
+
+ttestPow <- sum(rej)/K
+ttestPow
+```
+
+
+
+So, in day 3, total revenue and in-game purchase and game duration demonstrated
+significant change already.
+Test the power
+
+
+```{r, results='hide', echo=FALSE, warning=FALSE, message=FALSE}
+dataA4 = rbind( dataA1, dataA2, dataA3)
+dataB4 = rbind(dataB1, dataB2, dataB3)
+
+# T-test for ad revenue
+t_test_ad_revenue_day4 <- t.test(dataA4$ad_clicks * 0.01, dataB4$ad_clicks * 0.01)
+t_test_ad_revenue_day4$p.value
+
+
+```
+
+
+```{r, results='hide', echo=FALSE}
+# Simulated p-values from four hypothesis tests
+p_values <- c(0.003884644, 0.003887117, 0.0005561706)
+
+# Set the original significance level (alpha)
+alpha <- 0.05
+
+# Number of tests conducted
+m <- length(p_values)
+
+# Calculate the Bonferroni-corrected significance level
+alpha_bonferroni <- alpha / m
+
+# Create a vector to store adjusted results
+adjusted_results <- vector("logical", length = m)
+
+# Apply the Bonferroni correction
+for (i in 1:m) {
+  adjusted_results[i] <- p_values[i] <= alpha_bonferroni
+}
+
+# Print the Bonferroni-corrected results
+
+cat("Bonferroni-corrected results (Significant if TRUE):\n", adjusted_results, "\n\n")
+cat("Bonferroni-corrected significance level (Alpha Bonferroni):\n", alpha_bonferroni, "\n")
+
+```
+
+
+
+
+
+
+
+

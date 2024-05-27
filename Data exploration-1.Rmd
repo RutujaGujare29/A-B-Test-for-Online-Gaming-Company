@@ -1,0 +1,103 @@
+---
+title: "Final Assignment"
+output: pdf_document
+date: "2023-09-12"
+---
+
+```{r}
+hist_data = read.csv("hist_data.csv")
+dataA1 = read.csv("dataA1.csv")
+dataB1 = read.csv("dataA1.csv")
+dataA2 = read.csv("dataA2.csv")
+dataB2 = read.csv("dataA2.csv")
+```
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+```
+
+
+
+```{r}
+hist_data %>% ggplot(aes(x=in_game_purchases, y=play_time)) + geom_point()
+model <- lm(in_game_purchases ~ play_time, data = hist_data)
+model
+```
+
+```{r}
+hist_data %>% ggplot(aes(x=in_game_purchases, y=play_time_bot)) + geom_point()
+cor(hist_data$in_game_purchases, hist_data$play_time_bot)
+
+```
+
+```{r}
+hist_data %>% ggplot(aes(x=in_game_purchases, y=idle_time)) + geom_point()
+cor(hist_data$in_game_purchases, hist_data$idle_time)
+model2 <- lm(in_game_purchases ~ idle_time, data = hist_data)
+model2
+
+
+boxplot(hist_data$in_game_purchases ~ hist_data$ad_clicks)
+```
+
+
+```{r}
+model_full <- lm(in_game_purchases ~ n_games + n_games_bot + play_time + idle_time + ad_clicks, data = hist_data)
+model_full
+
+model_full_1 <- lm(in_game_purchases ~ ad_clicks, data = hist_data)
+model_full_1
+```
+
+
+```{r}
+# Drop unnecessary columns
+data <- hist_data[, -c(1, 2)]
+
+# Compute the correlation matrix
+cor_matrix <- cor(data)
+
+# Visualize the correlation matrix using corrplot
+corrplot(cor_matrix, method = "color", type = "full", 
+         addCoef.col = "black",   # Add correlation coefficient on the plot
+         tl.col="black", tl.srt=45,  # Text label color and rotation
+         col = colorRampPalette(c("#67001f", "white", "#053061"))(200))  # Adjusted color scheme
+
+```
+
+```{r}
+hist_data %>% ggplot(aes(x=in_game_purchases)) + 
+  geom_histogram(color="black", fill="ivory1", bins = 30, aes(y = stat(density))) +
+  geom_density(alpha=.25, color="navy", size=0.75)
+```
+
+
+```{r}
+
+data$revenue <- data$in_game_purchases + (data$ad_clicks * 0.01)
+
+```
+
+
+```{r}
+hist_data %>% ggplot(aes(x=revenue)) + 
+  geom_histogram(color="black", fill="ivory1", bins = 30, aes(y = stat(density))) +
+  geom_density(alpha=.25, color="navy", size=0.75)
+```
+
+
+```{r}
+hist_data %>% ggplot(aes(x=play_time)) + 
+  geom_histogram(color="black", fill="ivory1", bins = 30, aes(y = stat(density))) +
+  geom_density(alpha=.25, color="navy", size=0.75)
+```
+
+
+
+
+
+
+
+
+
